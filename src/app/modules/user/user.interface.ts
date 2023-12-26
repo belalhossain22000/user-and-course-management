@@ -5,6 +5,6 @@ export interface TUser {
     username:string,
     email: string;
     password: string;
-    role: 'admin' | 'student';
+    role: 'admin' | 'user';
    
   }
