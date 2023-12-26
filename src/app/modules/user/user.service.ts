@@ -1,6 +1,8 @@
+import config from "../../config";
 import { TLoginUser, TUser } from "./user.interface";
 import { UserModel } from "./user.model";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 
 
 
@@ -38,14 +40,18 @@ const loginUser = async (payload: TLoginUser) => {
         throw new Error("Invalid password")
     }
 
-    const result = {
-        _id: user?._id,
+    const jwtPayload = {
         username: user?.username,
-        email: user?.email,
         role: user?.role
     }
 
-    return result
+    // generate access token
+
+    const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "30d" })
+
+    return {
+        accessToken
+    }
 
 
 };
