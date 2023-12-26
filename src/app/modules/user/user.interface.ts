@@ -8,3 +8,8 @@ export interface TUser {
     role: 'admin' | 'user';
    
   }
+
+  export type TLoginUser = {
+    username: string;
+    password: string;
+  };

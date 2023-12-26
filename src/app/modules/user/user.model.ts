@@ -18,12 +18,11 @@ const userSchema = new Schema<TUser>(
         password: {
             type: String,
             required: true,
-            select: 0,
         },
         role: {
             type: String,
             enum: ['user', 'admin'],
-            default:"user"
+            default: "user"
         },
     },
     {
@@ -34,20 +33,20 @@ const userSchema = new Schema<TUser>(
 // password hashing
 userSchema.pre('save', async function (next) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const user = this; 
+    const user = this;
     user.password = await bcrypt.hash(
-      user.password,
-      Number(config.password_salt_rounds),
+        user.password,
+        Number(config.password_salt_rounds),
     );
-  
+
     next();
-  });
+});
 
 
 //remove password using post method
 userSchema.post<TUser>('save', function (doc, next) {
     if (doc) {
-        doc.password =undefined;
+        doc.password = "";
     }
     next();
 });

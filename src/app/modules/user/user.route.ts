@@ -6,12 +6,23 @@ import { UserControllers } from './user.controller';
 
 const router = express.Router();
 
+// register user
 router.post(
     '/register', validateData(UserValidation.userValidationSchema),
     UserControllers.createUser
 );
 
+// login user
+router.post(
+    '/login', validateData(UserValidation.loginUserValidationSchema),
+    UserControllers.loginUser
+);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-const alu ="ccc"
+// change user password
+router.post(
+    '/change-password', validateData(UserValidation.changePasswordValidationSchema),
+    UserControllers.changePassword
+);
+
+
 export const UserRoutes = router;
