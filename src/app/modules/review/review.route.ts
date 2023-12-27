@@ -2,12 +2,13 @@ import express from 'express'
 import { CourseReviewControllers } from './review.controller';
 import { ReviewValidation } from './review.validation';
 import { validateData } from '../../middlewares/validateData';
+import auth from '../../middlewares/auth';
 
 
 const router = express.Router();
 
 router.post(
-    '/', validateData(ReviewValidation.CreteReviewValidationSchema), CourseReviewControllers.createCourseReview,
+    '/',auth("user"), validateData(ReviewValidation.CreteReviewValidationSchema), CourseReviewControllers.createCourseReview,
 );
 
 
