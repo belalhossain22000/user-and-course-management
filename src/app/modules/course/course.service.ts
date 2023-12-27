@@ -101,7 +101,10 @@ const getAllCourseFromDB = async (query: Record<string, unknown>) => {
     const sortCriteria: any = {};
     sortCriteria[sortBy as string] = sortOrder === 'asc' ? 1 : -1;
 
-    const courses = await CourseModel.find(filter)
+    const courses = await CourseModel.find(filter).populate({
+        path: 'createdBy',
+        select: '-password -createdAt -updatedAt', 
+    })
         .sort(sortCriteria)
         .skip(skip)
         .limit(limit as number);
