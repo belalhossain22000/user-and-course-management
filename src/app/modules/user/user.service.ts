@@ -5,6 +5,7 @@ import { PasswordHistory, TLoginUser, TUser, UserDocument } from "./user.interfa
 import { UserModel } from "./user.model";
 import bcrypt from 'bcrypt';
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import { newPasswordValidationSchema } from "./user.validation";
 
 
 
@@ -116,14 +117,19 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
         .sort({ timestamp: -1 })
         .limit(2);
 
+
+    // checking is password is match last two password or current one
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     const isPasswordRepeated = previousPasswords.some(prevPassword => {
-        return bcrypt.compareSync(payload.newPassword, prevPassword.passwordHash);
+        const isMatch = bcrypt.compareSync(payload.newPassword, prevPassword.passwordHash);
+        if (isMatch) {
+            const formattedTimestamp = prevPassword.timestamp.toLocaleString();
+            throw new Error(`Password change failed. Ensure the new password is unique and not among the last 2 used and current one  (last used on ${formattedTimestamp}).`);
+        }
+        return isMatch;
     });
 
-    if (isPasswordRepeated) {
-        throw new Error("Password change failed. New password cannot be one of the last 2 used passwords or the current one.");
-    }
-
+    newPasswordValidationSchema.parse({ newPassword: payload.newPassword });
     //  hashing new password
 
     const newHashedPassword = await bcrypt.hash(payload.newPassword, Number(config.password_salt_rounds))
