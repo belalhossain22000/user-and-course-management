@@ -35,8 +35,11 @@ const loginUser = catchAsync(async (req, res) => {
 
 // chang user password
 const changePassword = catchAsync(async (req, res) => {
-    
-    const result = await UserService.changePasswordIntoDB( );
+
+   
+    const { ...passwordData } = req.body;
+
+    const result = await UserService.changePasswordIntoDB(req.user,passwordData);
 
     sendResponse(res, {
         success: true,

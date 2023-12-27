@@ -44,12 +44,12 @@ userSchema.pre('save', async function (next) {
 
 
 //remove password using post method
-userSchema.post<TUser>('save', function (doc, next) {
-    if (doc) {
-        doc.password = "";
-    }
-    next();
-});
+// userSchema.post<TUser>('save', function (doc, next) {
+//     if (doc) {
+//         doc.password = "";
+//     }
+//     next();
+// });
 
 
 // creating user model

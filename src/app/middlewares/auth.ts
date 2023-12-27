@@ -16,11 +16,13 @@ const auth = (...requiredRole: TUserRole[]) => {
             throw new Error('You are not authorized!');
         }
 
+      
+
         jwt.verify(token, config.jwt_access_secret as string, function (err, decoded) {
             if (err) {
                 throw new Error("you are not authorize")
             }
-
+       
             const role = (decoded as JwtPayload).role
 
             if (requiredRole && !requiredRole.includes(role)) {
@@ -29,6 +31,7 @@ const auth = (...requiredRole: TUserRole[]) => {
 
             // setting user in request 
             req.user = decoded as JwtPayload
+           
             next();
         })
 
