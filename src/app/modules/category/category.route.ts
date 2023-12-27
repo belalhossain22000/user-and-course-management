@@ -8,11 +8,14 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
+// create category route only admin can create a category
 router.post(
-    '/', validateData(CategoryValidation.createCategoryValidationSchema), CAtegoryControllers.createCategory,
+    '/',auth("admin"), validateData(CategoryValidation.createCategoryValidationSchema), CAtegoryControllers.createCategory,
 );
+
+// get all category 
 router.get(
-    '/',auth(), CAtegoryControllers.getAllCategory,
+    '/', CAtegoryControllers.getAllCategory,
 );
 
 export const CategoryRoutes = router;

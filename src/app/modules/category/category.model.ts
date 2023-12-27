@@ -10,6 +10,11 @@ const categorySchema = new Schema<TCategory>(
             unique: true,
             index: true
         },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        }
     },
     {
         timestamps: true,
