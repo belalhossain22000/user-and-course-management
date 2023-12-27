@@ -136,11 +136,13 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
                 foreignField: 'courseId',
                 as: 'reviews'
             }
-        }
+        },
+       
     ]);
 
     if (result.length > 0) {
-        const foundCourse = result[0];
+        const foundCourse =await result[0];
+       
         return foundCourse;
 
     } else {
