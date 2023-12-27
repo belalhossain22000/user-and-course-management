@@ -8,7 +8,7 @@ import { JwtPayload } from "jsonwebtoken";
 
 
 //create course services
-const createCourseIntoDB = async (userData:JwtPayload,payload: TCourse) => {
+const createCourseIntoDB = async (userData: JwtPayload, payload: TCourse) => {
 
     const { startDate, endDate } = payload;
 
@@ -22,7 +22,7 @@ const createCourseIntoDB = async (userData:JwtPayload,payload: TCourse) => {
     const courseDataWithDuration: TCourse & { durationInWeeks: number } = {
         ...payload,
         durationInWeeks,
-        createdBy:userData?._id
+        createdBy: userData?._id
     };
 
     const result = await CourseModel.create(courseDataWithDuration);
@@ -103,7 +103,7 @@ const getAllCourseFromDB = async (query: Record<string, unknown>) => {
 
     const courses = await CourseModel.find(filter).populate({
         path: 'createdBy',
-        select: '-password -createdAt -updatedAt', 
+        select: '-password -createdAt -updatedAt',
     })
         .sort(sortCriteria)
         .skip(skip)
@@ -189,7 +189,9 @@ const getBestCourseFromDB = async () => {
 }
 
 //update course with course id
-const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
+const updateCourseIntoDB = async ( id: string, payload: Partial<TCourse>) => {
+
+    // checking is course is exist
     const existCourse = await CourseModel.isCourseExists(id)
     if (!existCourse) {
         throw new Error(`Course not found with the id ${id}`)
@@ -261,7 +263,10 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
     }
 
     //  return the updated course 
-    const updatedCourse = await CourseModel.findById(id);
+    const updatedCourse = await CourseModel.findById(id).populate({
+        path: 'createdBy',
+        select: '-password -createdAt -updatedAt',
+    });
     return updatedCourse;
 
 };

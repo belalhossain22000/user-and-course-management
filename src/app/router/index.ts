@@ -14,10 +14,6 @@ const moduleRoutes = [
         route: CategoryRoutes,
     },
     {
-        path: '/course',
-        route: CourseRoutes,
-    },
-    {
         path: '/courses',
         route: CourseRoutes,
     },

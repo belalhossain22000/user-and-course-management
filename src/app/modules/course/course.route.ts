@@ -30,7 +30,7 @@ router.get(
 
 // update course by course id admin can only update a course
 router.put(
-    '/:courseId', validateData(CourseValidation.UpdateValidationCourseSchema), CourseControllers.updateCourse,
+    '/:courseId',auth("admin"), validateData(CourseValidation.UpdateValidationCourseSchema), CourseControllers.updateCourse,
 );
 
 
