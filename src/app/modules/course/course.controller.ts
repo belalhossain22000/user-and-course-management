@@ -8,7 +8,7 @@ import { CourseServices } from "./course.service";
 //create course with category
 const createCourse = catchAsync(async (req, res) => {
     const result = await CourseServices.createCourseIntoDB(
-        req.body,
+        req.user, req.body,
     );
 
     sendResponse(res, {

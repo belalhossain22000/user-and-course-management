@@ -21,6 +21,7 @@ const CreateCourseValidationSchema = z.object({
         level: z.string(),
         description: z.string(),
     }),
+    
 });
 
 const UpdateValidationCourseSchema = z.object({

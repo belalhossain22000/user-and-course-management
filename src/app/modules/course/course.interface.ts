@@ -16,6 +16,7 @@ export type TCourse = {
         level: string;
         description: string;
     };
+    createdBy:Types.ObjectId
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

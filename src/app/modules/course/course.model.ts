@@ -52,7 +52,15 @@ const courseSchema = new Schema<TCourse>({
             required: true
         },
     },
-});
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
+},
+    {
+        timestamps: true
+    });
 
 //creating a custom static method
 courseSchema.statics.isCourseExists = async function (id: string) {

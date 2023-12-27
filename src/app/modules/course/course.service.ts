@@ -3,11 +3,12 @@ import mongoose from "mongoose";
 import { TCourse } from "./course.interface";
 import { CourseModel } from "./course.model";
 import { ReviewModel } from "../review/review.model";
+import { JwtPayload } from "jsonwebtoken";
 
 
 
 //create course services
-const createCourseIntoDB = async (payload: TCourse) => {
+const createCourseIntoDB = async (userData:JwtPayload,payload: TCourse) => {
 
     const { startDate, endDate } = payload;
 
@@ -21,7 +22,9 @@ const createCourseIntoDB = async (payload: TCourse) => {
     const courseDataWithDuration: TCourse & { durationInWeeks: number } = {
         ...payload,
         durationInWeeks,
+        createdBy:userData?._id
     };
+
     const result = await CourseModel.create(courseDataWithDuration);
     return result;
 };
