@@ -98,10 +98,10 @@ const loginUser = async (payload: TLoginUser) => {
 const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPassword: string, newPassword: string }) => {
 
 
-    // Find the user by email in the database
+    // // Find the user by email in the database
     const user = await UserModel.findOne({ _id: userData?._id });
 
-    // check the user is exist
+    // // check the user is exist
     if (!user) {
         throw new Error(` User not found `)
     }
