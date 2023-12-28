@@ -20,6 +20,8 @@ const reviewSchema = new Schema<TReview>({
         ref: 'User',
         required: true
     }
+}, {
+    timestamps: true
 });
 
 // Compile the model using the schema

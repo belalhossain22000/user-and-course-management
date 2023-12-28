@@ -189,6 +189,7 @@ const getBestCourseFromDB = async () => {
         {
             $sort: { averageRating: -1, reviewCount: -1 },
         },
+      
         {
             $lookup: {
                 from: 'courses',
@@ -200,7 +201,31 @@ const getBestCourseFromDB = async () => {
         {
             $unwind: '$course',
         },
-
+        {
+            $lookup: {
+                from: 'users',
+                let: { creatorId: '$course.createdBy' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ['$_id', '$$creatorId'] }
+                        }
+                    },
+                    {
+                        $project: {
+                            password: 0,
+                            updatedAt: 0,
+                            createdAt: 0
+                        }
+                    }
+                ],
+                as: 'createdBy',
+            },
+        },
+        {
+            $unwind: '$createdBy',
+        },
+        
     ]);
 
 
