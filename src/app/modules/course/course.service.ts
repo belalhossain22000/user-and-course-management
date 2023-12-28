@@ -131,18 +131,42 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
         },
         {
             $lookup: {
+                from: 'users',
+                let: { creatorId: '$createdBy' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ['$_id', '$$creatorId'] }
+                        }
+                    },
+                    {
+                        $project: {
+                            password: 0,
+                            updatedAt: 0,
+                            createdAt: 0
+                        }
+                    }
+                ],
+                as: 'createdBy'
+            }
+        },
+        {
+            $unwind: '$createdBy'
+        },
+        {
+            $lookup: {
                 from: 'reviews',
                 localField: '_id',
                 foreignField: 'courseId',
                 as: 'reviews'
             }
         },
-       
+
     ]);
 
     if (result.length > 0) {
-        const foundCourse =await result[0];
-       
+        const foundCourse = await result[0];
+
         return foundCourse;
 
     } else {
@@ -191,7 +215,7 @@ const getBestCourseFromDB = async () => {
 }
 
 //update course with course id
-const updateCourseIntoDB = async ( id: string, payload: Partial<TCourse>) => {
+const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
 
     // checking is course is exist
     const existCourse = await CourseModel.isCourseExists(id)
