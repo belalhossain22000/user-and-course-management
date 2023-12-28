@@ -4,6 +4,8 @@ import catchAsync from "../utils/catchAsync";
 import { NextFunction, Request, Response } from "express";
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
+import AppError from '../utils/AppError';
+import httpStatus from 'http-status';
 
 
 const auth = (...requiredRole: TUserRole[]) => {
@@ -13,20 +15,18 @@ const auth = (...requiredRole: TUserRole[]) => {
 
         // checking if the token is missing
         if (!token) {
-            throw new Error('You are not authorized!');
+            throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
         }
-
-      
 
         jwt.verify(token, config.jwt_access_secret as string, function (err, decoded) {
             if (err) {
-                throw new Error("you are not authorize")
+                throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
             }
        
             const role = (decoded as JwtPayload).role
 
             if (requiredRole && !requiredRole.includes(role)) {
-                throw new Error("you are not authorize")
+                throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
             }
 
             // setting user in request 

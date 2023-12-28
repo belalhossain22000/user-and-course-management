@@ -5,6 +5,8 @@ import { CourseModel } from "./course.model";
 import { ReviewModel } from "../review/review.model";
 import { JwtPayload } from "jsonwebtoken";
 import { UserModel } from "../user/user.model";
+import AppError from "../../utils/AppError";
+import httpStatus from "http-status";
 
 
 
@@ -178,7 +180,7 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
             if (userDetails) {
                 review.createdBy = userDetails; // Replace createdBy field with user details
             } else {
-                throw new Error(`User not found with the id ${userId}`);
+                throw new AppError(httpStatus.NOT_FOUND,`User not found with the id ${userId}`);
             }
             return review;
         });
@@ -191,7 +193,7 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
 
         return foundCourse;
     } else {
-        throw new Error(`Course not found with the id ${courseId}`)
+        throw new AppError(httpStatus.NOT_FOUND,`Course not found with the id ${courseId}`)
     }
 
 }
@@ -266,7 +268,7 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
     // checking is course is exist
     const existCourse = await CourseModel.isCourseExists(id)
     if (!existCourse) {
-        throw new Error(`Course not found with the id ${id}`)
+        throw new AppError(httpStatus.NOT_FOUND,`Course not found with the id ${id}`)
     }
     const { tags, details, endDate, startDate, ...courseRemainingData } = payload;
 

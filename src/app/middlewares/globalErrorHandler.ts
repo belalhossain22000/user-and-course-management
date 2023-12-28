@@ -1,55 +1,73 @@
-import { NextFunction, Request, Response } from "express";
-import { ZodError, ZodIssue } from "zod";
 
-// Define a custom interface extending Error
-interface CustomError extends Error {
-    code: number;
-    value?: string | unknown; // Add 'value' property here
-}
+import { ZodError} from "zod";
+import AppError from "../utils/AppError";
+import { ErrorRequestHandler } from "express";
+import { TErrorSources } from "../interface/error";
+import handleZodError from "../errors/handleZodError";
+import handleValidationError from "../errors/handleValidationError";
+import handleCastError from "../errors/handleCastError";
+import handleDuplicateError from "../errors/handleDuplicateError";
 
-const globalErrorHandler = (
-    err: CustomError, // Adjust the type here as 'Error | any'
-    req: Request,
-    res: Response,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-    next: NextFunction
-) => {
-    // Default error response object
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorResponse: any = {
-        success: false,
-        message: 'Internal Server Error',
-        errorMessage: err.message,
-        errorDetails: err,
-        stack: err.stack,
-    };
 
-    if (err.name === 'CastError' && 'value' in err) {
-        if (err instanceof Error) {
-            errorResponse.message = 'Invalid ID';
-            errorResponse.errorMessage = `${err.value} is not a valid ID!`;
-        }
-    } else if (err instanceof ZodError) {
-        const extractedMessage = err.issues.map((issue: ZodIssue) => {
-            return {
-                path: issue?.path[issue.path.length - 1],
-                message: issue.message,
-            };
-        });
-        errorResponse.message = 'Validation Error';
-        errorResponse.errorMessage = extractedMessage;
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    //setting default values
+    let statusCode = 500;
+    let message = 'Something went wrong!';
+    let errorSources: TErrorSources = [
+      {
+        path: '',
+        message: 'Something went wrong',
+      },
+    ];
+  
+    if (err instanceof ZodError) {
+      const simplifiedError = handleZodError(err);
+      statusCode = simplifiedError?.statusCode;
+      message = simplifiedError?.message;
+      errorSources = simplifiedError?.errorSources;
+    } else if (err?.name === 'ValidationError') {
+      const simplifiedError = handleValidationError(err);
+      statusCode = simplifiedError?.statusCode;
+      message = simplifiedError?.message;
+      errorSources = simplifiedError?.errorSources;
+    } else if (err?.name === 'CastError') {
+      const simplifiedError = handleCastError(err);
+      statusCode = simplifiedError?.statusCode;
+      message = simplifiedError?.message;
+      errorSources = simplifiedError?.errorSources;
     } else if (err?.code === 11000) {
-        if (err instanceof Error) {
-            const match = err.message.match(/"([^"]*)"/);
-            const extractedMessage = match && match[1];
-            errorResponse.message = 'Duplicate Key Error';
-            errorResponse.errorMessage = `${extractedMessage} is already exist`;
-        }
-    } else if (err instanceof Error && err.name === 'ValidationError') {
-        errorResponse.message = err.message; // Use 'message' property directly
+      const simplifiedError = handleDuplicateError(err);
+      statusCode = simplifiedError?.statusCode;
+      message = simplifiedError?.message;
+      errorSources = simplifiedError?.errorSources;
+    } else if (err instanceof AppError) {
+      statusCode = err?.statusCode;
+      message = err.message;
+      errorSources = [
+        {
+          path: '',
+          message: err?.message,
+        },
+      ];
+    } else if (err instanceof Error) {
+      message = err.message;
+      errorSources = [
+        {
+          path: '',
+          message: err?.message,
+        },
+      ];
     }
-
-    res.status(500).json(errorResponse);
-};
+  
+    //ultimate return
+    return res.status(statusCode).json({
+      success: false,
+      message,
+      errorSources,
+      err,
+      stack: err?.stack 
+    });
+  };
 
 export default globalErrorHandler;
