@@ -4,6 +4,7 @@ import { TCourse } from "./course.interface";
 import { CourseModel } from "./course.model";
 import { ReviewModel } from "../review/review.model";
 import { JwtPayload } from "jsonwebtoken";
+import { UserModel } from "../user/user.model";
 
 
 
@@ -167,8 +168,28 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
     if (result.length > 0) {
         const foundCourse = await result[0];
 
-        return foundCourse;
+        // Fetching user details for each review's createdBy field
+        const reviewPromises = foundCourse.reviews.map(async (review:any) => {
+            const userId = review.createdBy;
 
+            // Fetch user details using userId from the 'users' collection
+            const userDetails = await UserModel.findOne({ _id: userId }, { password: 0, updatedAt: 0, createdAt: 0 });
+
+            if (userDetails) {
+                review.createdBy = userDetails; // Replace createdBy field with user details
+            } else {
+                throw new Error(`User not found with the id ${userId}`);
+            }
+            return review;
+        });
+
+        // Execute all promises for fetching user details concurrently
+        const populatedReviews = await Promise.all(reviewPromises);
+
+        // Replace reviews array in foundCourse with populatedReviews
+        foundCourse.reviews = populatedReviews;
+
+        return foundCourse;
     } else {
         throw new Error(`Course not found with the id ${courseId}`)
     }
@@ -189,7 +210,7 @@ const getBestCourseFromDB = async () => {
         {
             $sort: { averageRating: -1, reviewCount: -1 },
         },
-      
+
         {
             $lookup: {
                 from: 'courses',
@@ -225,7 +246,7 @@ const getBestCourseFromDB = async () => {
         {
             $unwind: '$createdBy',
         },
-        
+
     ]);
 
 
