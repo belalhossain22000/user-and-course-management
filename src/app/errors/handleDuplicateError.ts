@@ -19,7 +19,7 @@ const handleDuplicateError = (err: any): TGenericErrorResponse => {
 
   return {
     statusCode,
-    message: 'Invalid ID',
+    message: errorSources[0].message,
     errorSources,
   };
 };
