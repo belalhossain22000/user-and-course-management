@@ -18,13 +18,13 @@ const createUserIntoDB = async (payload: TUser) => {
     const isUserExist = await UserModel.findOne({ email: payload?.email })
 
     if (isUserExist) {
-        throw new AppError(httpStatus.BAD_REQUEST,"User already exist")
+        throw new AppError(httpStatus.BAD_REQUEST, "User already exist")
     }
 
     const result = await UserModel.create(payload) as UserDocument
 
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND,"something went wrong user not crated")
+        throw new AppError(httpStatus.NOT_FOUND, "something went wrong user not crated")
     }
 
     // collecting password for history 
@@ -35,7 +35,7 @@ const createUserIntoDB = async (payload: TUser) => {
     })
 
     if (!PasswordHistorySave) {
-        throw new AppError(httpStatus.NOT_FOUND,"Something went wrong ")
+        throw new AppError(httpStatus.NOT_FOUND, "Something went wrong ")
     }
 
 
@@ -62,13 +62,13 @@ const loginUser = async (payload: TLoginUser) => {
 
 
     if (!user) {
-        throw new AppError(httpStatus.NOT_FOUND,` User not found `)
+        throw new AppError(httpStatus.NOT_FOUND, ` User not found `)
     }
     // Compare the provided password 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-        throw new AppError(httpStatus.BAD_REQUEST,"Invalid password")
+        throw new AppError(httpStatus.BAD_REQUEST, "Invalid password")
     }
 
     const jwtPayload = {
@@ -89,7 +89,7 @@ const loginUser = async (payload: TLoginUser) => {
     const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "30d" })
 
     return {
-        user:returnUser,
+        user: returnUser,
         accessToken
     }
 
@@ -105,13 +105,13 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
 
     // // check the user is exist
     if (!user) {
-        throw new AppError(httpStatus.NOT_FOUND,` User not found `)
+        throw new AppError(httpStatus.NOT_FOUND, ` User not found `)
     }
     //  Compare the provided password 
     const passwordMatch = await bcrypt.compare(payload.currentPassword, user.password);
 
     if (!passwordMatch) {
-        throw new AppError(httpStatus.BAD_REQUEST,"Invalid password")
+        throw new AppError(httpStatus.BAD_REQUEST, "Invalid password")
     }
 
     // Check if the new password matches any of the previous 2 passwords or the current one
@@ -120,17 +120,21 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
         .limit(2);
 
 
-    // checking is password is match last two password or current one
+    // checking is password is match last two password 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     const isPasswordRepeated = previousPasswords.some(prevPassword => {
         const isMatch = bcrypt.compareSync(payload.newPassword, prevPassword.passwordHash);
         if (isMatch) {
             const formattedTimestamp = prevPassword.timestamp.toLocaleString();
-            throw new AppError(httpStatus.BAD_REQUEST,`Password change failed. Ensure the new password is unique and not among the last 2 used and current one  (last used on ${formattedTimestamp}).`);
+            throw new AppError(httpStatus.BAD_REQUEST, `Password change failed. Ensure the new password is unique and not among the last 2 used and current one  (last used on ${formattedTimestamp}).`);
         }
         return isMatch;
     });
-
+    //  current one password checking is match
+    if (payload.currentPassword === payload.newPassword) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Password change failed. Ensure the new password is unique and not among the last 2 used and current one")
+    }
+    
     newPasswordValidationSchema.parse({ newPassword: payload.newPassword });
     //  hashing new password
 

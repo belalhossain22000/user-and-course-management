@@ -6,6 +6,7 @@ import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import AppError from '../utils/AppError';
 import httpStatus from 'http-status';
+import { UserModel } from '../modules/user/user.model';
 
 
 const auth = (...requiredRole: TUserRole[]) => {
@@ -15,27 +16,41 @@ const auth = (...requiredRole: TUserRole[]) => {
 
         // checking if the token is missing
         if (!token) {
-            throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
+            throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
         }
 
-        jwt.verify(token, config.jwt_access_secret as string, function (err, decoded) {
+        jwt.verify(token, config.jwt_access_secret as string, async (err, decoded) => {
             if (err) {
-                throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
-            }
-       
-            const role = (decoded as JwtPayload).role
-
-            if (requiredRole && !requiredRole.includes(role)) {
-                throw new AppError(httpStatus.BAD_REQUEST,'You are not authorized!');
+                throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
             }
 
-            // setting user in request 
-            req.user = decoded as JwtPayload
-           
-            next();
-        })
+            const { role, _id } = decoded as JwtPayload;
+
+
+            try {
+                // check if the user exists
+                const isUserExist = await UserModel.findById(_id).select("-password");
+
+                if (!isUserExist) {
+                    throw new AppError(httpStatus.NOT_FOUND, "User not found ")
+                }
+
+                if (requiredRole.length && !requiredRole.includes(role)) {
+                    throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
+                }
+
+                // setting user in request 
+                req.user = decoded as JwtPayload;
+
+                next();
+            } catch (error) {
+                
+                next(error);
+            }
+        });
 
     });
 };
 
 export default auth;
+
