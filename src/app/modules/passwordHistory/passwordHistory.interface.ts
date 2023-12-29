@@ -4,5 +4,6 @@ import { Types } from "mongoose";
 export type PasswordHistory = {
     userId:Types.ObjectId; 
     passwordHash: string;
+    passwordChangeAt:string;
     timestamp: Date;
 };

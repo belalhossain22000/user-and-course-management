@@ -7,6 +7,8 @@ import { TUserRole } from '../modules/user/user.interface';
 import AppError from '../utils/AppError';
 import httpStatus from 'http-status';
 import { UserModel } from '../modules/user/user.model';
+import { PasswordHistoryModel } from '../modules/passwordHistory/passwordHistory.model';
+
 
 
 const auth = (...requiredRole: TUserRole[]) => {
@@ -20,8 +22,8 @@ const auth = (...requiredRole: TUserRole[]) => {
         }
 
         jwt.verify(token, config.jwt_access_secret as string, async (err, decoded) => {
-            
-            const { role, _id } = decoded as JwtPayload;
+
+            const { role, _id, iat } = decoded as JwtPayload;
 
 
             try {
@@ -36,12 +38,25 @@ const auth = (...requiredRole: TUserRole[]) => {
                     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
                 }
 
+                let passwordChangedTime: number | null = null;
+
+                const passwordChangeDate = await PasswordHistoryModel.findOne(
+                    { userId: _id })
+
+                if (passwordChangeDate && passwordChangeDate.timestamp) {
+                    passwordChangedTime = new Date(passwordChangeDate.timestamp).getTime() / 1000;
+                }
+
+                if (passwordChangedTime && iat && passwordChangedTime > iat) {
+                    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+                }
+
                 // setting user in request 
                 req.user = decoded as JwtPayload;
 
                 next();
             } catch (error) {
-                
+
                 next(error);
             }
         });

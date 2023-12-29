@@ -146,6 +146,12 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
         { new: true }
     ).select("-password")
 
+    await PasswordHistoryModel.findOneAndUpdate( 
+        { userId: user?._id},
+        {timestamp:Date.now()}
+    
+    )
+
     return result
 }
 
