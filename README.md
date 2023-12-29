@@ -1,9 +1,9 @@
 # Assignment-3
 
 ## Description
-## Live deployment link:https://assaignment-3.vercel.app/
+## Live deployment link:https://assaignment-4-two.vercel.app/
 ## Project demonstration video: 
-This project serves as an API demonstrating course, review, and course category management functionality.
+This project serves as an API demonstrating user authentication, course, review, and course category management functionality.
 
 ## Installation
 
@@ -53,9 +53,24 @@ This command uses ts-node-dev to run the server with automatic reloading on file
 
 ## Routes
 
+### Register user
+
+- **Endpoint**: `/api/auth/register`
+- **Method**: `POST`
+- **Request Body**: Provide details required for creating a user.
+### Login user
+
+- **Endpoint**: `/api/auth/login`
+- **Method**: `POST`
+- **Request Body**: Provide details required for Login.
+### Change password
+
+- **Endpoint**: `/api/auth/change-password`
+- **Method**: `POST`
+- **Request Body**: Provide details required for change user password.
 ### Create a Course
 
-- **Endpoint**: `/api/course`
+- **Endpoint**: `/api/courses`
 - **Method**: `POST`
 - **Request Body**: Provide details required for creating a course.
 
