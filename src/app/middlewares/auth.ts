@@ -20,10 +20,7 @@ const auth = (...requiredRole: TUserRole[]) => {
         }
 
         jwt.verify(token, config.jwt_access_secret as string, async (err, decoded) => {
-            if (err) {
-                throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
-            }
-
+            
             const { role, _id } = decoded as JwtPayload;
 
 
