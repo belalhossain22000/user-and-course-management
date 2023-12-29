@@ -231,30 +231,30 @@ const getBestCourseFromDB = async () => {
         {
             $unwind: '$course',
         },
-        {
-            $lookup: {
-                from: 'users',
-                let: { creatorId: '$course.createdBy' },
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: { $eq: ['$_id', '$$creatorId'] }
-                        }
-                    },
-                    {
-                        $project: {
-                            password: 0,
-                            updatedAt: 0,
-                            createdAt: 0
-                        }
-                    }
-                ],
-                as: 'createdBy',
-            },
-        },
-        {
-            $unwind: '$createdBy',
-        },
+        // {
+        //     $lookup: {
+        //         from: 'users',
+        //         let: { creatorId: '$course.createdBy' },
+        //         pipeline: [
+        //             {
+        //                 $match: {
+        //                     $expr: { $eq: ['$_id', '$$creatorId'] }
+        //                 }
+        //             },
+        //             {
+        //                 $project: {
+        //                     password: 0,
+        //                     updatedAt: 0,
+        //                     createdAt: 0
+        //                 }
+        //             }
+        //         ],
+        //         as: 'createdBy',
+        //     },
+        // },
+        // {
+        //     $unwind: '$createdBy',
+        // },
 
     ]);
 
@@ -262,7 +262,18 @@ const getBestCourseFromDB = async () => {
 
     if (result.length > 0) {
         const bestCourse = result[0];
-        return bestCourse
+
+        const userId = bestCourse.course.createdBy;
+        // Fetch user details using userId from the 'users' collection
+        const userDetails = await UserModel.findOne({ _id: userId }, { password: 0, updatedAt: 0, createdAt: 0 });
+
+        if (userDetails) {
+            bestCourse.course.createdBy = userDetails;
+            return bestCourse
+        } else {
+            throw new AppError(httpStatus.NOT_FOUND, `User not found with the id ${userId}`);
+        }
+
     } else {
         return "Course not found"
     }
