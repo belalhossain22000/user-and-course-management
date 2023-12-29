@@ -86,11 +86,11 @@ const loginUser = async (payload: TLoginUser) => {
 
     // generate access token
 
-    const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "30d" })
+    const token = jwt.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "30d" })
 
     return {
         user: returnUser,
-        accessToken
+        token
     }
 
 

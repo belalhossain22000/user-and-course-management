@@ -7,13 +7,20 @@ import { JwtPayload } from "jsonwebtoken";
 import { UserModel } from "../user/user.model";
 import AppError from "../../utils/AppError";
 import httpStatus from "http-status";
+import { CategoryModel } from "../category/category.model";
 
 
 
 //create course services
 const createCourseIntoDB = async (userData: JwtPayload, payload: TCourse) => {
 
-    const { startDate, endDate } = payload;
+    const { startDate, endDate, categoryId } = payload;
+
+    // checking is category exist
+    const isCategoryExist = await CategoryModel.findById(categoryId)
+    if (!isCategoryExist) {
+        throw new AppError(httpStatus.NOT_FOUND, `Category not found with the id ${categoryId}`)
+    }
 
     // Calculate durationInWeeks
     const start = new Date(startDate);
@@ -171,7 +178,7 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
         const foundCourse = await result[0];
 
         // Fetching user details for each review's createdBy field
-        const reviewPromises = foundCourse.reviews.map(async (review:any) => {
+        const reviewPromises = foundCourse.reviews.map(async (review: any) => {
             const userId = review.createdBy;
 
             // Fetch user details using userId from the 'users' collection
@@ -180,7 +187,7 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
             if (userDetails) {
                 review.createdBy = userDetails; // Replace createdBy field with user details
             } else {
-                throw new AppError(httpStatus.NOT_FOUND,`User not found with the id ${userId}`);
+                throw new AppError(httpStatus.NOT_FOUND, `User not found with the id ${userId}`);
             }
             return review;
         });
@@ -193,7 +200,7 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
 
         return foundCourse;
     } else {
-        throw new AppError(httpStatus.NOT_FOUND,`Course not found with the id ${courseId}`)
+        throw new AppError(httpStatus.NOT_FOUND, `Course not found with the id ${courseId}`)
     }
 
 }
@@ -268,7 +275,7 @@ const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
     // checking is course is exist
     const existCourse = await CourseModel.isCourseExists(id)
     if (!existCourse) {
-        throw new AppError(httpStatus.NOT_FOUND,`Course not found with the id ${id}`)
+        throw new AppError(httpStatus.NOT_FOUND, `Course not found with the id ${id}`)
     }
     const { tags, details, endDate, startDate, ...courseRemainingData } = payload;
 
