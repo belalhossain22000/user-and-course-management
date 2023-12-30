@@ -102,7 +102,7 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
 
     // // Find the user by email in the database
     const user = await UserModel.findOne({ _id: userData?._id });
-    
+
     // // check the user is exist
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, ` User not found `)
@@ -126,18 +126,19 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
         const isMatch = bcrypt.compareSync(payload.newPassword, prevPassword.passwordHash);
         if (isMatch) {
             const formattedTimestamp = prevPassword.timestamp.toLocaleString();
-            throw new AppError(httpStatus.BAD_REQUEST, `Password change failed. Ensure the new password is unique and not among the last 2 used and current one  (last used on ${formattedTimestamp}).`);
+        
+            throw new Error( `Password change failed. Ensure the new password is unique and not among the last 2 used and current one  (last used on ${formattedTimestamp}).`);
         }
         return isMatch;
     });
     //  current one password checking is match
     if (payload.currentPassword === payload.newPassword) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Password change failed. Ensure the new password is unique and not among the last 2 used and current one")
+        throw new Error( "Password change failed. Ensure the new password is unique and not among the last 2 used and current one")
     }
-    
-    newPasswordValidationSchema.parse({ newPassword: payload.newPassword });
-    //  hashing new password
 
+    newPasswordValidationSchema.parse({ newPassword: payload.newPassword });
+   
+    //  hashing new password
     const newHashedPassword = await bcrypt.hash(payload.newPassword, Number(config.password_salt_rounds))
 
 
