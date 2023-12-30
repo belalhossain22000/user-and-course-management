@@ -21,46 +21,44 @@ const auth = (...requiredRole: TUserRole[]) => {
             throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
         }
 
-        jwt.verify(token, config.jwt_access_secret as string, async (err, decoded) => {
+        // checking if the given token is valid
+        const decoded = jwt.verify(
+            token,
+            config.jwt_access_secret as string,
+        ) as JwtPayload;
 
-            const { role, _id, iat } = decoded as JwtPayload;
+        const { role, _id, iat } = decoded ;
 
 
-            try {
-                // check if the user exists
-                const isUserExist = await UserModel.findById(_id).select("-password");
 
-                if (!isUserExist) {
-                    throw new AppError(httpStatus.NOT_FOUND, "User not found ")
-                }
+        // check if the user exists
+        const isUserExist = await UserModel.findById(_id).select("-password");
 
-                if (requiredRole.length && !requiredRole.includes(role)) {
-                    throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
-                }
+        if (!isUserExist) {
+            throw new AppError(httpStatus.NOT_FOUND, "User not found ")
+        }
 
-                let passwordChangedTime: number | null = null;
+        if (requiredRole && !requiredRole.includes(role)) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized!');
+        }
 
-                const passwordChangeDate = await PasswordHistoryModel.findOne(
-                    { userId: _id })
+        let passwordChangedTime: number | null = null;
 
-                if (passwordChangeDate && passwordChangeDate.timestamp) {
-                    passwordChangedTime = new Date(passwordChangeDate.timestamp).getTime() / 1000;
-                }
+        const passwordChangeDate = await PasswordHistoryModel.findOne(
+            { userId: _id })
 
-                if (passwordChangedTime && iat && passwordChangedTime > iat) {
-                    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
-                }
+        if (passwordChangeDate && passwordChangeDate.timestamp) {
+            passwordChangedTime = new Date(passwordChangeDate.timestamp).getTime() / 1000;
+        }
 
-                // setting user in request 
-                req.user = decoded as JwtPayload;
+        if (passwordChangedTime && iat && passwordChangedTime > iat) {
+            throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+        }
 
-                next();
-            } catch (error) {
+        // setting user in request 
+        req.user = decoded as JwtPayload;
 
-                next(error);
-            }
-        });
-
+        next();
     });
 };
 
