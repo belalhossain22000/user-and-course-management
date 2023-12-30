@@ -2,7 +2,7 @@
 
 ## Description
 ## Live deployment link:https://assaignment-4-two.vercel.app/
-## Project demonstration video: 
+## Project documentation: https://documenter.getpostman.com/view/27386605/2s9YsDjEmP 
 This project serves as an API demonstrating user authentication, course, review, and course category management functionality.
 
 ## Installation
