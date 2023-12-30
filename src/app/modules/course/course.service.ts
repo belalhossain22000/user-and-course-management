@@ -185,17 +185,17 @@ const getSingleCourseFromDB = async (courseId: string): Promise<void> => {
             const userDetails = await UserModel.findOne({ _id: userId }, { password: 0, updatedAt: 0, createdAt: 0 });
 
             if (userDetails) {
-                review.createdBy = userDetails; // Replace createdBy field with user details
+                review.createdBy = userDetails; 
             } else {
                 throw new AppError(httpStatus.NOT_FOUND, `User not found with the id ${userId}`);
             }
             return review;
         });
 
-        // Execute all promises for fetching user details concurrently
+        
         const populatedReviews = await Promise.all(reviewPromises);
 
-        // Replace reviews array in foundCourse with populatedReviews
+        
         foundCourse.reviews = populatedReviews;
 
         return foundCourse;
