@@ -102,7 +102,7 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
 
     // // Find the user by email in the database
     const user = await UserModel.findOne({ _id: userData?._id });
-
+    
     // // check the user is exist
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, ` User not found `)
@@ -140,17 +140,19 @@ const changePasswordIntoDB = async (userData: JwtPayload, payload: { currentPass
 
     const newHashedPassword = await bcrypt.hash(payload.newPassword, Number(config.password_salt_rounds))
 
+
     const result = await UserModel.findOneAndUpdate(
         { _id: user?._id, email: user?.email, role: user?.role },
         { password: newHashedPassword, },
         { new: true }
     ).select("-password")
 
-    await PasswordHistoryModel.findOneAndUpdate( 
-        { userId: user?._id},
-        {timestamp:Date.now()}
-    
-    )
+    // // collecting password for history 
+    await PasswordHistoryModel.create({
+        userId: user?._id,
+        passwordHash: user?.password,
+        timestamp: Date.now()
+    })
 
     return result
 }
