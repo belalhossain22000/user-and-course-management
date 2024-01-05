@@ -1,7 +1,7 @@
 # User and course management
 
 ## Description
-## Live deployment link:https://assaignment-4-two.vercel.app/
+## Live deployment link: https://user-and-course.vercel.app/
 ## Project documentation: https://documenter.getpostman.com/view/27386605/2s9YsDjEmP 
 This project serves as an API demonstrating user authentication, course, review, and course category management functionality.
 
