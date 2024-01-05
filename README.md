@@ -1,4 +1,4 @@
-# Assignment-4
+# User and course management
 
 ## Description
 ## Live deployment link:https://assaignment-4-two.vercel.app/
